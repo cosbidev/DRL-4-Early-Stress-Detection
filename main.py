@@ -2,30 +2,27 @@
 """
 Created on Mon Jul 24 11:52:53 2023
 
-@author: leona
+@author: Leonardo Furia
 """
 
 from gym import spaces
-import numpy as np
-import torch
 import torch.nn as nn
 import torch as th
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3 import SAC
-from utils import DataDownloader
-from utils import calculate_rew_threshold
-from utils import calculate_rew_mean_threshold
-from utils import Evaluate4Classes
-from utils import Evaluate3Classes
-from env import PhysioEnv4Classes
-from env import PhysioEnv3Classes
+from lib.utils import DataDownloader
+from lib.utils import calculate_rew_threshold
+from lib.utils import calculate_rew_mean_threshold
+from lib.utils import Evaluate4Classes
+from lib.utils import Evaluate3Classes
+from lib.env import PhysioEnv4Classes
+from lib.env import PhysioEnv3Classes
 
 
 
 NUM_CLASSES=4
-
-device = th.device('cuda' if th.cuda.is_available() else 'cpu')
+PATH='./Results'
 
 
 class CustomCNN(BaseFeaturesExtractor):
@@ -103,11 +100,11 @@ if NUM_CLASSES==4:
         
         model = SAC("MlpPolicy", env, use_sde=True, learning_rate=0.0001, batch_size=256, learning_starts=5000,
                 use_sde_at_warmup=True, verbose=1, buffer_size=15000, gamma=0.99, policy_kwargs=policy_kwargs,
-                tensorboard_log='./StressSAC_ContinuosAction_Train3Classe_mlp_Tensorboard_Sogg{}'.format(s))  # ,action_noise=noise
+                tensorboard_log=PATH+'/4Classe_Tensorboard_Sogg{}'.format(s))  # ,action_noise=noise
         
         model.learn(40000, callback=eval_callback)
         
-        Evaluate4Classes(model=model,test=test,episode_max_len=300,window_size=8,subject=s)
+        Evaluate4Classes(model=model,test=test,path=PATH,episode_max_len=300,window_size=8,subject=s)
     
 else:
     
@@ -123,8 +120,8 @@ else:
         
         model = SAC("MlpPolicy", env, use_sde=True, learning_rate=0.0001, batch_size=256, learning_starts=5000,
                 use_sde_at_warmup=True, verbose=1, buffer_size=15000, gamma=0.99, policy_kwargs=policy_kwargs,
-                tensorboard_log='./StressSAC_ContinuosAction_Train3Classe_mlp_Tensorboard_Sogg{}'.format(s))  # ,action_noise=noise
+                tensorboard_log=PATH+'/3Classe_Tensorboard_Sogg{}'.format(s))  # ,action_noise=noise
         
         model.learn(40000, callback=eval_callback)
         
-        Evaluate3Classes(model=model,test=test,episode_max_len=300,window_size=8,subject=s)
+        Evaluate3Classes(model=model,test=test,path=PATH,episode_max_len=300,window_size=8,subject=s)
